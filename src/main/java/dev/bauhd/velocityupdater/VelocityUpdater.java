@@ -21,10 +21,10 @@ public final class VelocityUpdater {
     final var oldVersion = latestVersions[0];
     final var newVersion = latestVersions[1];
 
-    final var directory = Path.of("mache");
+    final var macheDirectory = Path.of("mache");
 
-    cloneMacheAndApplyPatches(directory, oldVersion, newVersion);
-    createDiff(directory, oldVersion, newVersion);
+    cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
+    createDiff(macheDirectory, oldVersion, newVersion);
   }
 
   private static void cloneMacheAndApplyPatches(
@@ -39,9 +39,9 @@ public final class VelocityUpdater {
     } else {
       execute(directoryFile, "git", "checkout", oldVersion.branchName());
     }
-    execute(directoryFile, "./gradlew.bat", "applyPatches");
+    execute(directoryFile, "cmd", "/C", "gradlew", "applyPatches");
     execute(directoryFile, "git", "checkout", newVersion.branchName());
-    execute(directoryFile, "./gradlew.bat", "applyPatches");
+    execute(directoryFile, "cmd", "/C", "gradlew", "applyPatches");
   }
 
   private static void createDiff(
