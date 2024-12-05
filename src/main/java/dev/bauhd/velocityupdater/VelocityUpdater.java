@@ -81,7 +81,7 @@ public final class VelocityUpdater {
     execute(diffFolderFile, "git", "commit", "-m", "2");
 
     execute(diffFolderFile, "cmd", "/C", "git", "diff", "--patch", commitHash, "HEAD", ">",
-        "patch");
+        "../patch");
   }
 
   private static void execute(final File directory, final String... command)
