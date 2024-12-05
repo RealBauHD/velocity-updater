@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 
 public final class VelocityUpdater {
 
@@ -24,6 +25,7 @@ public final class VelocityUpdater {
     final var macheDirectory = Path.of("mache");
 
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
+    deleteUnusefulThings(macheDirectory, oldVersion, newVersion);
     createDiff(macheDirectory, oldVersion, newVersion);
   }
 
@@ -44,8 +46,40 @@ public final class VelocityUpdater {
     execute(directoryFile, "cmd", "/C", "gradlew", "applyPatches");
   }
 
+  private static void deleteUnusefulThings(
+      final Path directory,
+      final MinecraftVersion oldVersion,
+      final MinecraftVersion newVersion
+  ) throws IOException {
+    final var unusefulThings = List.of(
+        "advancements",
+        "commands",
+        "data",
+        "gametest",
+        "locale",
+        "obfuscate",
+        "recipebook",
+        "sounds",
+        "stats",
+        "tags",
+        "world"
+    );
+    final var versionsDirectory = directory.resolve("versions");
+
+    for (final var version : new MinecraftVersion[]{oldVersion, newVersion}) {
+      final var minecraftDirectory = versionsDirectory.resolve(version.id())
+          .resolve("src").resolve("main").resolve("java")
+          .resolve("net").resolve("minecraft");
+      for (final var unusefulThing : unusefulThings) {
+        PathUtil.deleteDirectory(minecraftDirectory.resolve(unusefulThing));
+      }
+    }
+
+    System.out.println("Deleted unuseful things");
+  }
+
   private static void createDiff(
-      final Path directoryPath,
+      final Path directory,
       final MinecraftVersion oldVersion,
       final MinecraftVersion newVersion
   ) throws IOException, InterruptedException {
@@ -54,11 +88,11 @@ public final class VelocityUpdater {
     if (Files.notExists(diffFolder)) {
       Files.createDirectory(diffFolder);
     }
-    final var versionsFolder = directoryPath.resolve("versions");
+    final var versionsDirectory = directory.resolve("versions");
     execute(diffFolderFile, "git", "init");
 
     final var target = diffFolder.resolve("net");
-    PathUtil.copyFileTree(versionsFolder.resolve(oldVersion.id())
+    PathUtil.copyFileTree(versionsDirectory.resolve(oldVersion.id())
         .resolve("src").resolve("main").resolve("java").resolve("net"), target);
 
     execute(diffFolderFile, "git", "add", "*");
@@ -74,7 +108,7 @@ public final class VelocityUpdater {
       commitHash = reader.readLine();
     }
 
-    PathUtil.copyFileTree(versionsFolder.resolve(newVersion.id())
+    PathUtil.copyFileTree(versionsDirectory.resolve(newVersion.id())
         .resolve("src").resolve("main").resolve("java").resolve("net"), target);
 
     execute(diffFolderFile, "git", "add", "*");
