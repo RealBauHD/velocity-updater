@@ -1,7 +1,0 @@
-{
-  "play": {
-    "serverbound": {
-      "resourcepack": "ResourcePackResponsePacket"
-    }
-  }
-}

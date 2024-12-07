@@ -1,0 +1,109 @@
+{
+  "handshake": {
+    "serverbound": {
+      "intention": "HandshakePacket"
+    }
+  },
+  "status": {
+    "serverbound": {
+      "status_request": "StatusRequestPacket",
+      "ping_request": "StatusPingPacket"
+    },
+    "clientbound": {
+      "status_response": "StatusResponsePacket",
+      "pong_response": "StatusPingPacket"
+    }
+  },
+  "login": {
+    "serverbound": {
+      "hello": "ServerLoginPacket",
+      "key": "EncryptionResponsePacket",
+      "custom_query_answer": "LoginPluginResponsePacket",
+      "login_acknowledged": "LoginAcknowledgedPacket",
+      "cookie_response": "ServerboundCookieResponsePacket"
+    },
+    "clientbound": {
+      "login_disconnect": "DisconnectPacket",
+      "hello": "EncryptionRequestPacket",
+      "game_profile": "ServerLoginSuccessPacket",
+      "login_compression": "SetCompressionPacket",
+      "custom_query": "LoginPluginMessagePacket",
+      "cookie_request": "ClientboundCookieRequestPacket"
+    }
+  },
+  "configuration": {
+    "serverbound": {
+      "client_information": "ClientSettingsPacket",
+      "cookie_response": "ServerboundCookieResponsePacket",
+      "custom_payload": "PluginMessagePacket",
+      "finish_configuration": "FinishedUpdatePacket",
+      "keep_alive": "KeepAlivePacket",
+      "pong": "PingIdentifyPacket",
+      "resource_pack": "ResourcePackResponsePacket",
+      "select_known_packs": "KnownPacksPacket"
+    },
+    "clientbound": {
+      "cookie_request": "ClientboundCookieRequestPacket",
+      "custom_payload": "PluginMessagePacket",
+      "disconnect": "DisconnectPacket",
+      "finish_configuration": "FinishedUpdatePacket",
+      "keep_alive": "KeepAlivePacket",
+      "ping": "PingIdentifyPacket",
+      "registry_data": "RegistrySyncPacket",
+      "resource_pack_pop": "RemoveResourcePackPacket",
+      "resource_pack_push": "ResourcePackRequestPacket",
+      "store_cookie": "ClientboundStoreCookiePacket",
+      "transfer": "TransferPacket",
+      "update_enabled_features": "ActiveFeaturesPacket",
+      "update_tags": "TagsUpdatePacket",
+      "select_known_packs": "KnownPacksPacket",
+      "custom_report_details": "ClientboundCustomReportDetailsPacket",
+      "server_links": "ClientboundServerLinksPacket"
+    }
+  },
+  "play": {
+    "serverbound": {
+      "command_suggestion": "TabCompleteRequestPacket",
+      "chat_ack": "ChatAcknowledgementPacket",
+      "chat_command_signed": "SessionPlayerCommandPacket",
+      "chat_command": "UnsignedPlayerCommandPacket",
+      "chat": "SessionPlayerChatPacket",
+      "client_information": "ClientSettingsPacket",
+      "cookie_response": "ServerboundCookieResponsePacket",
+      "custom_payload": "PluginMessagePacket",
+      "keep_alive": "KeepAlivePacket",
+      "resourcepack": "ResourcePackResponsePacket",
+      "configuration_acknowledged": "FinishedUpdatePacket"
+    },
+    "clientbound": {
+      "boss_event": "BossBarPacket",
+      "command_suggestions": "TabCompleteResponsePacket",
+      "commands": "AvailableCommandsPacket",
+      "cookie_request": "ClientboundCookieRequestPacket",
+      "custom_payload": "PluginMessagePacket",
+      "disconnect": "DisconnectPacket",
+      "keep_alive": "KeepAlivePacket",
+      "login": "JoinGamePacket",
+      "respawn": "RespawnPacket",
+      "resource_pack_pop": "RemoveResourcePackPacket",
+      "resource_pack_push": "ResourcePackRequestPacket",
+      "tab_list": "HeaderAndFooterPacket",
+      "set_subtitle_text": "TitleSubtitlePacket",
+      "set_title_text": "TitleTextPacket",
+      "set_action_bar_text": "TitleActionbarPacket",
+      "set_titles_animation": "TitleTimesPacket",
+      "clear_titles": "TitleClearPacket",
+      "player_info_remove": "RemovePlayerInfoPacket",
+      "player_info_update": "UpsertPlayerInfoPacket",
+      "store_cookie": "ClientboundStoreCookiePacket",
+      "system_chat": "SystemChatPacket",
+      "custom_chat_completions": "PlayerChatCompletionPacket",
+      "server_data": "ServerDataPacket",
+      "start_configuration": "StartUpdatePacket",
+      "bundle_delimiter": "BundleDelimiterPacket",
+      "transfer": "TransferPacket",
+      "custom_report_details": "ClientboundCustomReportDetailsPacket",
+      "server_links": "ClientboundServerLinksPacket"
+    }
+  }
+}
