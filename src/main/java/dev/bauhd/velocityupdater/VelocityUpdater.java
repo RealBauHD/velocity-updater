@@ -23,10 +23,17 @@ public final class VelocityUpdater {
     final var newVersion = latestVersions[1];
 
     final var macheDirectory = Path.of("mache");
+    final var versionsDirectory = macheDirectory.resolve("versions");
+
+    for (final var version : latestVersions) {
+      version.setPath(versionsDirectory.resolve(version.id()));
+    }
 
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
-    deleteUnusefulThings(macheDirectory, oldVersion, newVersion);
-    createDiff(macheDirectory, oldVersion, newVersion);
+    deleteUnusefulThings(latestVersions);
+    createDiff(oldVersion, newVersion);
+
+    new PacketIdChecker(latestVersions);
   }
 
   private static void cloneMacheAndApplyPatches(
@@ -46,11 +53,7 @@ public final class VelocityUpdater {
     execute(directoryFile, "cmd", "/C", "gradlew", "applyPatches");
   }
 
-  private static void deleteUnusefulThings(
-      final Path directory,
-      final MinecraftVersion oldVersion,
-      final MinecraftVersion newVersion
-  ) throws IOException {
+  private static void deleteUnusefulThings(final MinecraftVersion[] versions) throws IOException {
     final var unusefulThings = List.of(
         "advancements",
         "commands",
@@ -64,10 +67,9 @@ public final class VelocityUpdater {
         "tags",
         "world"
     );
-    final var versionsDirectory = directory.resolve("versions");
 
-    for (final var version : new MinecraftVersion[]{oldVersion, newVersion}) {
-      final var minecraftDirectory = versionsDirectory.resolve(version.id())
+    for (final var version : versions) {
+      final var minecraftDirectory = version.path()
           .resolve("src").resolve("main").resolve("java")
           .resolve("net").resolve("minecraft");
       for (final var unusefulThing : unusefulThings) {
@@ -79,7 +81,6 @@ public final class VelocityUpdater {
   }
 
   private static void createDiff(
-      final Path directory,
       final MinecraftVersion oldVersion,
       final MinecraftVersion newVersion
   ) throws IOException, InterruptedException {
@@ -88,11 +89,10 @@ public final class VelocityUpdater {
     if (Files.notExists(diffFolder)) {
       Files.createDirectory(diffFolder);
     }
-    final var versionsDirectory = directory.resolve("versions");
     execute(diffFolderFile, "git", "init");
 
     final var target = diffFolder.resolve("net");
-    PathUtil.copyFileTree(versionsDirectory.resolve(oldVersion.id())
+    PathUtil.copyFileTree(oldVersion.path()
         .resolve("src").resolve("main").resolve("java").resolve("net"), target);
 
     execute(diffFolderFile, "git", "add", "*");
@@ -108,7 +108,7 @@ public final class VelocityUpdater {
       commitHash = reader.readLine();
     }
 
-    PathUtil.copyFileTree(versionsDirectory.resolve(newVersion.id())
+    PathUtil.copyFileTree(newVersion.path()
         .resolve("src").resolve("main").resolve("java").resolve("net"), target);
 
     execute(diffFolderFile, "git", "add", "*");
@@ -118,7 +118,7 @@ public final class VelocityUpdater {
         "../patch");
   }
 
-  private static void execute(final File directory, final String... command)
+  public static void execute(final File directory, final String... command)
       throws IOException, InterruptedException {
     new ProcessBuilder(command)
         .directory(directory)
