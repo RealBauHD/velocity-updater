@@ -55,7 +55,8 @@ public final class PacketIdChecker {
               }
               if (prev != null && prev != id) {
                 System.out.println("Changed id " + clazz.getAsString() + " - " +
-                    Integer.toHexString(prev) + " -> " + Integer.toHexString(id));
+                    Integer.toHexString(prev) + " -> " + Integer.toHexString(id) +
+                    " (" + phases.getKey() + ')');
               }
             }
           }
