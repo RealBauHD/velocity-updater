@@ -29,11 +29,19 @@ public final class VelocityUpdater {
       version.setPath(versionsDirectory.resolve(version.id()));
     }
 
+    final var outputDirectory = Path.of("output");
+    if (Files.exists(outputDirectory)) {
+      System.err.println("Please delete the old output directory!");
+      return;
+    } else {
+      Files.createDirectory(outputDirectory);
+    }
+
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
     deleteUnusefulThings(latestVersions);
-    createDiff(oldVersion, newVersion);
+    createDiff(oldVersion, newVersion, outputDirectory);
 
-    new PacketIdChecker(latestVersions);
+    new PacketIdChecker(latestVersions, outputDirectory);
   }
 
   private static void cloneMacheAndApplyPatches(
@@ -82,9 +90,10 @@ public final class VelocityUpdater {
 
   private static void createDiff(
       final MinecraftVersion oldVersion,
-      final MinecraftVersion newVersion
+      final MinecraftVersion newVersion,
+      final Path outputDirectory
   ) throws IOException, InterruptedException {
-    final var diffFolder = Path.of("diff");
+    final var diffFolder = outputDirectory.resolve("diff");
     final var diffFolderFile = diffFolder.toFile();
     if (Files.notExists(diffFolder)) {
       Files.createDirectory(diffFolder);

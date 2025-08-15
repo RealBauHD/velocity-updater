@@ -13,13 +13,13 @@ import java.util.Objects;
 
 public final class PacketIdChecker {
 
-  public PacketIdChecker(final MinecraftVersion[] versions)
+  public PacketIdChecker(final MinecraftVersion[] versions, final Path outputDirectory)
       throws IOException, InterruptedException {
     JsonObject mappings;
     try (final var input = this.getClass().getClassLoader()
-        .getResourceAsStream("type_to_class_mappings.json")) {
-      mappings = GSON.fromJson(new InputStreamReader(Objects.requireNonNull(input)),
-          JsonObject.class);
+        .getResourceAsStream("packet_mappings.json");
+        final var reader = new InputStreamReader(Objects.requireNonNull(input))) {
+      mappings = GSON.fromJson(reader, JsonObject.class);
     }
 
     final var map = new HashMap<String, Integer>();
@@ -39,6 +39,7 @@ public final class PacketIdChecker {
       try (final var reader = Files.newBufferedReader(packetJson)) {
         // what am I doing here
         final var json = GSON.fromJson(reader, JsonObject.class);
+        final var changes = new StringBuilder();
         for (final var phases : json.entrySet()) {
           for (final var bound : phases.getValue().getAsJsonObject().entrySet()) {
             for (final var packets : bound.getValue().getAsJsonObject().entrySet()) {
@@ -54,13 +55,16 @@ public final class PacketIdChecker {
                 continue;
               }
               if (prev != null && prev != id) {
-                System.out.println("Changed id " + clazz.getAsString() + " - " +
-                    Integer.toHexString(prev) + " -> " + Integer.toHexString(id) +
-                    " (" + phases.getKey() + ')');
+                changes.append("Changed id ").append(clazz.getAsString()).append(" - ")
+                    .append(Integer.toHexString(prev)).append(" -> ")
+                    .append(Integer.toHexString(id)).append(" (").append(phases.getKey())
+                    .append(')')
+                    .append('\n');
               }
             }
           }
         }
+        Files.writeString(outputDirectory.resolve("packets"), changes.toString());
       }
     }
   }
