@@ -1,6 +1,8 @@
 package dev.bauhd.velocityupdater;
 
 import com.google.gson.Gson;
+import dev.bauhd.velocityupdater.checker.CommandArgumentChecker;
+import dev.bauhd.velocityupdater.checker.PacketIdChecker;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -19,6 +21,7 @@ public final class VelocityUpdater {
     for (final var version : latestVersions) {
       System.out.println("- " + version.id() + " (" + version.type() + ")");
     }
+    latestVersions[0] = new MinecraftVersion("1.21.5", "release");
     final var oldVersion = latestVersions[0];
     final var newVersion = latestVersions[1];
 
@@ -40,7 +43,9 @@ public final class VelocityUpdater {
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
     deleteUnusefulThings(latestVersions);
     createDiff(oldVersion, newVersion, outputDirectory);
+    createReports(latestVersions);
 
+    new CommandArgumentChecker(latestVersions, outputDirectory);
     new PacketIdChecker(latestVersions, outputDirectory);
   }
 
@@ -127,7 +132,25 @@ public final class VelocityUpdater {
         "../patch");
   }
 
-  public static void execute(final File directory, final String... command)
+  private static void createReports(final MinecraftVersion[] versions)
+      throws IOException, InterruptedException {
+    for (final var version : versions) {
+      final Path serverJar = version.path()
+          .resolve(".gradle")
+          .resolve("mache")
+          .resolve("input");
+
+      execute(serverJar.toFile(),
+          "java", "-DbundlerMainClass=net.minecraft.data.Main",
+          "-jar", "download_input.jar",
+          "--reports"
+      );
+
+      version.setReports(serverJar.resolve("generated").resolve("reports"));
+    }
+  }
+
+  private static void execute(final File directory, final String... command)
       throws IOException, InterruptedException {
     new ProcessBuilder(command)
         .directory(directory)

@@ -7,6 +7,7 @@ public final class MinecraftVersion {
   private final String id;
   private final String type;
   private Path path;
+  private Path reports;
 
   public MinecraftVersion(final String id, final String type) {
     this.id = id;
@@ -31,5 +32,13 @@ public final class MinecraftVersion {
 
   public Path path() {
     return this.path;
+  }
+
+  public void setReports(final Path reports) {
+    this.reports = reports;
+  }
+
+  public Path reports() {
+    return this.reports;
   }
 }

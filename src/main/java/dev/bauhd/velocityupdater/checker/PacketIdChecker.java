@@ -1,9 +1,9 @@
-package dev.bauhd.velocityupdater;
+package dev.bauhd.velocityupdater.checker;
 
 import static dev.bauhd.velocityupdater.VelocityUpdater.GSON;
-import static dev.bauhd.velocityupdater.VelocityUpdater.execute;
 
 import com.google.gson.JsonObject;
+import dev.bauhd.velocityupdater.MinecraftVersion;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
@@ -14,7 +14,7 @@ import java.util.Objects;
 public final class PacketIdChecker {
 
   public PacketIdChecker(final MinecraftVersion[] versions, final Path outputDirectory)
-      throws IOException, InterruptedException {
+      throws IOException {
     JsonObject mappings;
     try (final var input = this.getClass().getClassLoader()
         .getResourceAsStream("packet_mappings.json");
@@ -24,18 +24,7 @@ public final class PacketIdChecker {
 
     final var map = new HashMap<String, Integer>();
     for (final var version : versions) {
-      final Path serverJar = version.path()
-          .resolve(".gradle")
-          .resolve("mache")
-          .resolve("input");
-
-      execute(serverJar.toFile(),
-          "java", "-DbundlerMainClass=net.minecraft.data.Main",
-          "-jar", "download_input.jar",
-          "--reports"
-      );
-      final var packetJson = serverJar.resolve("generated").resolve("reports")
-          .resolve("packets.json");
+      final var packetJson = version.reports().resolve("packets.json");
       try (final var reader = Files.newBufferedReader(packetJson)) {
         // what am I doing here
         final var json = GSON.fromJson(reader, JsonObject.class);
