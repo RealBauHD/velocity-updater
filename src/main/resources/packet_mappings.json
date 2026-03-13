@@ -40,7 +40,9 @@
       "keep_alive": "KeepAlivePacket",
       "pong": "PingIdentifyPacket",
       "resource_pack": "ResourcePackResponsePacket",
-      "select_known_packs": "KnownPacksPacket"
+      "select_known_packs": "KnownPacksPacket",
+      "custom_click_action": "ServerboundCustomClickActionPacket",
+      "accept_code_of_conduct": "CodeOfConductAcceptPacket"
     },
     "clientbound": {
       "cookie_request": "ClientboundCookieRequestPacket",
@@ -58,7 +60,10 @@
       "update_tags": "TagsUpdatePacket",
       "select_known_packs": "KnownPacksPacket",
       "custom_report_details": "ClientboundCustomReportDetailsPacket",
-      "server_links": "ClientboundServerLinksPacket"
+      "server_links": "ClientboundServerLinksPacket",
+      "clear_dialog": "DialogClearPacket",
+      "show_dialog": "DialogShowPacket",
+      "code_of_conduct": "CodeOfConductPacket"
     }
   },
   "play": {
