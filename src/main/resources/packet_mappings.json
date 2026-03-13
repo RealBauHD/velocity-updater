@@ -72,7 +72,7 @@
       "cookie_response": "ServerboundCookieResponsePacket",
       "custom_payload": "PluginMessagePacket",
       "keep_alive": "KeepAlivePacket",
-      "resourcepack": "ResourcePackResponsePacket",
+      "resource_pack": "ResourcePackResponsePacket",
       "configuration_acknowledged": "FinishedUpdatePacket"
     },
     "clientbound": {
@@ -80,6 +80,8 @@
       "command_suggestions": "TabCompleteResponsePacket",
       "commands": "AvailableCommandsPacket",
       "cookie_request": "ClientboundCookieRequestPacket",
+      "sound_entity": "ClientboundSoundEntityPacket",
+      "stop_sound": "ClientboundStopSoundPacket",
       "custom_payload": "PluginMessagePacket",
       "disconnect": "DisconnectPacket",
       "keep_alive": "KeepAlivePacket",
