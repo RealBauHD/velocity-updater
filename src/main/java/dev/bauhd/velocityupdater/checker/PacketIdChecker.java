@@ -9,9 +9,12 @@ import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 public final class PacketIdChecker {
+
+  public static final Map<String, Map<String, Map<String, Integer>>> PACKET_IDS = new HashMap<>();
 
   public PacketIdChecker(final MinecraftVersion[] versions, final Path outputDirectory)
       throws IOException {
@@ -37,8 +40,8 @@ public final class PacketIdChecker {
               final var key = phases.getKey() + '/' + bound.getKey() + '/' + packetId;
               final var id = packets.getValue().getAsJsonObject().get("protocol_id").getAsInt();
               final var prev = map.put(key, id);
-              final var phase = mappings.get(phases.getKey())
-                  .getAsJsonObject().get(bound.getKey()).getAsJsonObject();
+              final var phase = mappings.getAsJsonObject(phases.getKey())
+                  .get(bound.getKey()).getAsJsonObject();
               final var clazz = phase.get(packetId);
               if (clazz == null) {
                 continue;
@@ -49,6 +52,9 @@ public final class PacketIdChecker {
                     .append(Integer.toHexString(id)).append(" (").append(phases.getKey())
                     .append(')')
                     .append('\n');
+                PACKET_IDS.computeIfAbsent(phases.getKey(), _ -> new HashMap<>())
+                    .computeIfAbsent(bound.getKey(), _ -> new HashMap<>())
+                    .put(clazz.getAsString(), id);
               }
             }
           }

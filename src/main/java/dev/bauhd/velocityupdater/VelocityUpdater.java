@@ -15,9 +15,12 @@ public final class VelocityUpdater {
 
   public static final Gson GSON = new Gson();
 
-  static void main() throws IOException, InterruptedException {
+  static void main(String[] args) throws IOException, InterruptedException {
     System.out.println("Found latest versions:");
-    final var latestVersions = PistonMeta.latestVersions();
+    final var latestVersions = new MinecraftVersion[]{
+        new MinecraftVersion(args[0], args[1]),
+        new MinecraftVersion(args[2], args[3])
+    };
     for (final var version : latestVersions) {
       System.out.println("- " + version.id() + " (" + version.type() + ")");
     }
@@ -46,6 +49,8 @@ public final class VelocityUpdater {
 
     new CommandArgumentChecker(latestVersions, outputDirectory);
     new PacketIdChecker(latestVersions, outputDirectory);
+
+    new UpdateParser(latestVersions[1]);
   }
 
   private static void cloneMacheAndApplyPatches(
@@ -100,6 +105,7 @@ public final class VelocityUpdater {
       final MinecraftVersion newVersion,
       final Path outputDirectory
   ) throws IOException, InterruptedException {
+    System.out.println("Diff changes");
     final var diffFolder = outputDirectory.resolve("diff");
     final var diffFolderFile = diffFolder.toFile();
     if (Files.notExists(diffFolder)) {
@@ -130,12 +136,7 @@ public final class VelocityUpdater {
     execute(diffFolderFile, "git", "add", "*");
     execute(diffFolderFile, "git", "commit", "-m", "2");
 
-    System.out.println("Diff changes");
-    new ProcessBuilder("cmd", "/C", "git", "diff", "--patch", commitHash, "HEAD", ">", "../patch")
-        .directory(diffFolderFile)
-        .inheritIO()
-        .start()
-        .waitFor();
+    execute(diffFolderFile, "cmd", "/C", "git", "diff", "--patch", commitHash, "HEAD", ">", "../patch");
   }
 
   private static void createReports(final MinecraftVersion[] versions)

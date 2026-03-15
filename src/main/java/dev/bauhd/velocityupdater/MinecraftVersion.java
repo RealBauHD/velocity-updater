@@ -41,4 +41,8 @@ public final class MinecraftVersion {
   public Path reports() {
     return this.reports;
   }
+
+  public String toConstant() {
+    return "MINECRAFT_" + this.id.split("-")[0].replace('.', '_');
+  }
 }
