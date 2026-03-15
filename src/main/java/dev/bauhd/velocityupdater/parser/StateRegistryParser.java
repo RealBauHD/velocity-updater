@@ -13,7 +13,7 @@ public final class StateRegistryParser extends Parser {
     super("proxy/src/main/java/com/velocitypowered/proxy/protocol/StateRegistry.java");
   }
 
-  // TODO: linebreak and copy encode only
+  // TODO: linebreak
   @Override
   public boolean parse(CompilationUnit compilationUnit, MinecraftVersion version) {
     final var stateRegistryEnum = compilationUnit.getEnumByName("StateRegistry");
@@ -39,12 +39,15 @@ public final class StateRegistryParser extends Parser {
                 if (scope.isPresent() && !scope.get().toString().equals(entry.getKey())) {
                   continue;
                 }
+                final var arguments = methodCall.getArguments();
                 for (final var packetEntry : entry.getValue().entrySet()) {
-                  if (methodCall.getNameAsString().equals("register") && methodCall.getArgument(0)
+                  if (methodCall.getNameAsString().equals("register") && arguments.get(0)
                       .toString().equals(packetEntry.getKey() + ".class")) {
+                    final var id = this.toHex(packetEntry.getValue());
+                    final var encodeOnly = arguments.get(arguments.size() - 1)
+                        .asMethodCallExpr().getArgument(2).toString();
                     methodCall.addArgument(
-                        "map(" + this.toHex(packetEntry.getValue()) + ", " + versionConstant
-                            + ", false)");
+                        "map(" + id + ", " + versionConstant + ", " + encodeOnly + ")");
                   }
                 }
               }
