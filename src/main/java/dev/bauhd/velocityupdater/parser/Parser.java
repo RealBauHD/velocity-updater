@@ -5,15 +5,17 @@ import dev.bauhd.velocityupdater.MinecraftVersion;
 
 public abstract class Parser {
 
-  protected final String path;
+  public final String path;
 
   public Parser(final String path) {
     this.path = path;
   }
 
-  public abstract boolean parse(final CompilationUnit compilationUnit, final MinecraftVersion version);
+  public abstract boolean parse(
+      final CompilationUnit compilationUnit, final MinecraftVersion version
+  );
 
-  public String path() {
+  public final String path() {
     return this.path;
   }
 }

@@ -1,8 +1,8 @@
 package dev.bauhd.velocityupdater;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ParserConfiguration.LanguageLevel;
-import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.printer.lexicalpreservation.LexicalPreservingPrinter;
 import dev.bauhd.velocityupdater.parser.Parser;
 import dev.bauhd.velocityupdater.parser.ProtocolVersionParser;
@@ -19,7 +19,7 @@ public final class UpdateParser {
       return;
     }
 
-    StaticJavaParser.setConfiguration(new ParserConfiguration()
+    final var javaParser = new JavaParser(new ParserConfiguration()
         .setLanguageLevel(LanguageLevel.JAVA_21));
 
     final var parsers = new Parser[]{
@@ -33,7 +33,7 @@ public final class UpdateParser {
         continue;
       }
 
-      final var compilationUnit = StaticJavaParser.parse(path);
+      final var compilationUnit = javaParser.parse(path).getResult().orElseThrow();
       LexicalPreservingPrinter.setup(compilationUnit);
 
       if (parser.parse(compilationUnit, version)) {

@@ -2,6 +2,8 @@ package dev.bauhd.velocityupdater.parser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.EnumConstantDeclaration;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
+import com.github.javaparser.ast.expr.StringLiteralExpr;
 import dev.bauhd.velocityupdater.Extractor;
 import dev.bauhd.velocityupdater.MinecraftVersion;
 import java.io.IOException;
@@ -15,7 +17,7 @@ public final class ProtocolVersionParser extends Parser {
   }
 
   @Override
-  public boolean parse(CompilationUnit compilationUnit, MinecraftVersion version) {
+  public boolean parse(final CompilationUnit compilationUnit, final MinecraftVersion version) {
     final List<String> lines;
     try {
       lines = Files.readAllLines(version.path()
@@ -41,12 +43,12 @@ public final class ProtocolVersionParser extends Parser {
         enumConstant.getArguments().clear();
       }
       if (version.type().equals("snapshot")) {
-        enumConstant.addArgument("-1");
+        enumConstant.addArgument(new IntegerLiteralExpr("-1"));
         enumConstant.addArgument(Extractor.constant(lines, "SNAPSHOT_NETWORK_PROTOCOL_VERSION"));
       } else {
         enumConstant.addArgument(Extractor.constant(lines, "RELEASE_NETWORK_PROTOCOL_VERSION"));
       }
-      enumConstant.addArgument("\"" + version.id() + "\"");
+      enumConstant.addArgument(new StringLiteralExpr(version.id()));
       return true;
     }
     return false;

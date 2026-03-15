@@ -2,7 +2,9 @@ package dev.bauhd.velocityupdater.parser;
 
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.ImportDeclaration;
+import com.github.javaparser.ast.expr.IntegerLiteralExpr;
 import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.ast.expr.NameExpr;
 import dev.bauhd.velocityupdater.MinecraftVersion;
 import dev.bauhd.velocityupdater.checker.PacketIdChecker;
 import java.util.Locale;
@@ -15,7 +17,7 @@ public final class StateRegistryParser extends Parser {
 
   // TODO: linebreak
   @Override
-  public boolean parse(CompilationUnit compilationUnit, MinecraftVersion version) {
+  public boolean parse(final CompilationUnit compilationUnit, final MinecraftVersion version) {
     final var stateRegistryEnum = compilationUnit.getEnumByName("StateRegistry");
     if (stateRegistryEnum.isPresent()) {
       final var versionConstant = version.toConstant();
@@ -45,9 +47,11 @@ public final class StateRegistryParser extends Parser {
                       .toString().equals(packetEntry.getKey() + ".class")) {
                     final var id = this.toHex(packetEntry.getValue());
                     final var encodeOnly = arguments.get(arguments.size() - 1)
-                        .asMethodCallExpr().getArgument(2).toString();
-                    methodCall.addArgument(
-                        "map(" + id + ", " + versionConstant + ", " + encodeOnly + ")");
+                        .asMethodCallExpr().getArgument(2);
+                    methodCall.addArgument(new MethodCallExpr("map",
+                        new IntegerLiteralExpr(id),
+                        new NameExpr(versionConstant),
+                        encodeOnly));
                   }
                 }
               }
