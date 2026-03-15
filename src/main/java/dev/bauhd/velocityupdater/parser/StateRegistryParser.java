@@ -1,6 +1,7 @@
 package dev.bauhd.velocityupdater.parser;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.ImportDeclaration;
 import com.github.javaparser.ast.expr.MethodCallExpr;
 import dev.bauhd.velocityupdater.MinecraftVersion;
 import dev.bauhd.velocityupdater.checker.PacketIdChecker;
@@ -18,6 +19,9 @@ public final class StateRegistryParser extends Parser {
     final var stateRegistryEnum = compilationUnit.getEnumByName("StateRegistry");
     if (stateRegistryEnum.isPresent()) {
       final var versionConstant = version.toConstant();
+      compilationUnit.addImport(new ImportDeclaration(
+          "com.velocitypowered.api.network.ProtocolVersion." + versionConstant, true, false));
+
       final var declaration = stateRegistryEnum.get();
       for (final var enumEntry : declaration.getEntries()) {
         String name = enumEntry.getNameAsString().toLowerCase(Locale.ROOT);
