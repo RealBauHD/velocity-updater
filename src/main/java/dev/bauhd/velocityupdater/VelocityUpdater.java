@@ -3,10 +3,8 @@ package dev.bauhd.velocityupdater;
 import com.google.gson.Gson;
 import dev.bauhd.velocityupdater.checker.CommandArgumentChecker;
 import dev.bauhd.velocityupdater.checker.PacketIdChecker;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -44,13 +42,13 @@ public final class VelocityUpdater {
 
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
     deleteUnusefulThings(latestVersions);
-    createDiff(oldVersion, newVersion, outputDirectory);
+    createDiff(oldVersion, newVersion, macheDirectory);
     createReports(latestVersions);
 
     new CommandArgumentChecker(latestVersions, outputDirectory);
     new PacketIdChecker(latestVersions, outputDirectory);
 
-    new UpdateParser(latestVersions[1]);
+    new UpdateParser(newVersion);
   }
 
   private static void cloneMacheAndApplyPatches(
@@ -103,40 +101,13 @@ public final class VelocityUpdater {
   private static void createDiff(
       final MinecraftVersion oldVersion,
       final MinecraftVersion newVersion,
-      final Path outputDirectory
+      final Path macheDirectory
   ) throws IOException, InterruptedException {
     System.out.println("Diff changes");
-    final var diffFolder = outputDirectory.resolve("diff");
-    final var diffFolderFile = diffFolder.toFile();
-    if (Files.notExists(diffFolder)) {
-      Files.createDirectory(diffFolder);
-    }
-    execute(diffFolderFile, "git", "init");
-
-    final var target = diffFolder.resolve("net");
-    PathUtil.copyFileTree(oldVersion.path()
-        .resolve("src").resolve("main").resolve("java").resolve("net"), target);
-
-    execute(diffFolderFile, "git", "add", "*");
-    execute(diffFolderFile, "git", "commit", "-m", "1");
-
-    PathUtil.deleteDirectory(target);
-
-    final var process = new ProcessBuilder("git", "rev-parse", "HEAD")
-        .directory(diffFolderFile)
-        .start();
-    String commitHash;
-    try (final var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-      commitHash = reader.readLine();
-    }
-
-    PathUtil.copyFileTree(newVersion.path()
-        .resolve("src").resolve("main").resolve("java").resolve("net"), target);
-
-    execute(diffFolderFile, "git", "add", "*");
-    execute(diffFolderFile, "git", "commit", "-m", "2");
-
-    execute(diffFolderFile, "cmd", "/C", "git", "diff", "--patch", commitHash, "HEAD", ">", "../patch");
+    execute(macheDirectory.resolve("versions").toFile(), "cmd", "/C", "git", "diff", "--no-index",
+        oldVersion.id() + "/src/main/java/net",
+        newVersion.id() + "/src/main/java/net",
+        ">", "../../output/diff.patch");
   }
 
   private static void createReports(final MinecraftVersion[] versions)
