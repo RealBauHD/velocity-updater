@@ -3,8 +3,11 @@ package dev.bauhd.velocityupdater;
 import com.google.gson.Gson;
 import dev.bauhd.velocityupdater.checker.CommandArgumentChecker;
 import dev.bauhd.velocityupdater.checker.PacketIdChecker;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,7 +45,7 @@ public final class VelocityUpdater {
 
     cloneMacheAndApplyPatches(macheDirectory, oldVersion, newVersion);
     deleteUnusefulThings(latestVersions);
-    createDiff(oldVersion, newVersion, macheDirectory);
+    createDiff(oldVersion, newVersion, outputDirectory);
     createReports(latestVersions);
 
     new CommandArgumentChecker(latestVersions, outputDirectory);
@@ -75,23 +78,20 @@ public final class VelocityUpdater {
         "data",
         "gametest",
         "locale",
-        "obfuscate",
         "recipebook",
         "sounds",
         "stats",
         "tags",
-        "world"
+        "world",
+        "server/commands"
     );
 
     for (final var version : versions) {
       final var minecraftDirectory = version.path()
-          .resolve("src").resolve("main").resolve("java")
-          .resolve("net").resolve("minecraft");
+          .resolve("src/main/java/net/minecraft");
       for (final var unusefulThing : unusefulThings) {
         final var path = minecraftDirectory.resolve(unusefulThing);
-        if (Files.exists(path)) {
-          PathUtil.deleteDirectory(path);
-        }
+        PathUtil.deleteDirectory(path);
       }
     }
 
@@ -101,13 +101,48 @@ public final class VelocityUpdater {
   private static void createDiff(
       final MinecraftVersion oldVersion,
       final MinecraftVersion newVersion,
-      final Path macheDirectory
-  ) throws IOException, InterruptedException {
+      final Path outputDirectory
+  ) throws IOException {
     System.out.println("Diff changes");
-    execute(macheDirectory.resolve("versions").toFile(), "cmd", "/C", "git", "diff", "--no-index",
-        oldVersion.id() + "/src/main/java/net",
-        newVersion.id() + "/src/main/java/net",
-        ">", "../../output/diff.patch");
+    final var diffFolder = outputDirectory.resolve("diff");
+    final var oldRoot = oldVersion.path().resolve("src/main/java/net/minecraft");
+    final var newRoot = newVersion.path().resolve("src/main/java/net/minecraft");
+    final var process = new ProcessBuilder("git", "diff", "--no-index", "--name-status",
+        ".", "../../../../../../" + newVersion.id() + "/src/main/java/net/minecraft")
+        .directory(oldRoot.toFile())
+        .redirectError(Redirect.INHERIT)
+        .start();
+
+    final var devNull = System.getProperty("os.name").startsWith("Windows") ? "NUL" : "/dev/null";
+    try (final var reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        final var parts = line.split("\\s+");
+        final var status = parts[0];
+        final var file = parts[1];
+        final var oldFile = oldRoot.resolve(file);
+        final var newFile = newRoot.resolve(file);
+        final var patchFile = diffFolder.resolve(file + ".patch");
+        Files.createDirectories(patchFile.getParent());
+
+        Process diffProcess;
+        switch (status) {
+          case "A" -> diffProcess = new ProcessBuilder(
+              "git", "diff", "--no-index", devNull, newFile.toString()
+          ).redirectError(Redirect.INHERIT).start();
+          case "D" -> diffProcess = new ProcessBuilder(
+              "git", "diff", "--no-index", oldFile.toString(), devNull
+          ).redirectError(Redirect.INHERIT).start();
+          default -> diffProcess = new ProcessBuilder(
+              "git", "diff", "--no-index", oldFile.toString(), newFile.toString()
+          ).redirectError(Redirect.INHERIT).start();
+        }
+
+        try (final var out = Files.newOutputStream(patchFile)) {
+          diffProcess.getInputStream().transferTo(out);
+        }
+      }
+    }
   }
 
   private static void createReports(final MinecraftVersion[] versions)
