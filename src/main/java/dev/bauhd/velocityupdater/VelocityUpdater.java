@@ -64,6 +64,7 @@ public final class VelocityUpdater {
       execute(null, "git", "clone", "https://github.com/PaperMC/mache.git",
           "-b", oldVersion.branchName());
     } else {
+      execute(directoryFile, "git pull");
       execute(directoryFile, "git", "checkout", oldVersion.branchName());
     }
     execute(directoryFile, "cmd", "/C", "gradlew", "applyPatches");
