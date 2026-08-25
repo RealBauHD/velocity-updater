@@ -27,13 +27,13 @@ public final class CommandArgumentChecker {
           final JsonObject value = entry.getValue().getAsJsonObject();
           final var id = value.get("protocol_id").getAsInt();
           final var prev = map.put(key, id);
-          if (prev != null && prev != id) {
+          if (prev == null) {
+            changes.append("Added ").append(key).append(" ").append(id).append('\n');
+          } else if (prev != id) {
             changes.append("Changed id ").append(key).append(" - ")
-                .append(Integer.toHexString(prev)).append(" -> ")
-                .append(Integer.toHexString(id))
+                .append(prev).append(" -> ")
+                .append(id)
                 .append('\n');
-          } else if (prev == null) {
-            changes.append("Added ").append(key).append('\n');
           }
         }
         Files.writeString(outputDirectory.resolve("command_arguments"), changes.toString());
