@@ -43,10 +43,18 @@ public final class ProtocolVersionParser extends Parser {
         enumConstant.getArguments().clear();
       }
       if (version.type().equals("snapshot")) {
+        final var snapshotProtocol = Extractor.constant(lines, "SNAPSHOT_NETWORK_PROTOCOL_VERSION");
         enumConstant.addArgument(new IntegerLiteralExpr("-1"));
-        enumConstant.addArgument(Extractor.constant(lines, "SNAPSHOT_NETWORK_PROTOCOL_VERSION"));
+        enumConstant.addArgument(new IntegerLiteralExpr(snapshotProtocol));
       } else {
-        enumConstant.addArgument(Extractor.constant(lines, "RELEASE_NETWORK_PROTOCOL_VERSION"));
+        final var releaseProtocol = Extractor.constant(lines, "RELEASE_NETWORK_PROTOCOL_VERSION");
+        final var previousVersion = declaration.getEntry(declaration.getEntries().size() - 2);
+        if (previousVersion.getArgument(0).toString().equals(releaseProtocol)) {
+          declaration.remove(enumConstant);
+          enumConstant = previousVersion;
+        } else {
+          enumConstant.addArgument(new IntegerLiteralExpr(releaseProtocol));
+        }
       }
       enumConstant.addArgument(new StringLiteralExpr(version.id()));
       return true;
