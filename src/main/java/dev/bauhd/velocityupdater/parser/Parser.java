@@ -5,7 +5,7 @@ import dev.bauhd.velocityupdater.MinecraftVersion;
 
 public abstract class Parser {
 
-  public final String path;
+  private final String path;
 
   public Parser(final String path) {
     this.path = path;
