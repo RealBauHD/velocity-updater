@@ -19,7 +19,7 @@ public final class StateRegistryParser extends Parser {
   @Override
   public boolean parse(final CompilationUnit compilationUnit, final MinecraftVersion version) {
     final var stateRegistryEnum = compilationUnit.getEnumByName("StateRegistry");
-    if (stateRegistryEnum.isPresent() && !PacketIdChecker.PACKET_IDS.isEmpty()) {
+    if (stateRegistryEnum.isEmpty() || PacketIdChecker.PACKET_IDS.isEmpty()) {
       return false;
     }
     final var versionConstant = version.toConstant();
