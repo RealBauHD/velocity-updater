@@ -54,7 +54,7 @@ public final class PacketIdChecker {
                     .append('\n');
                 PACKET_IDS.computeIfAbsent(phases.getKey(), _ -> new HashMap<>())
                     .computeIfAbsent(bound.getKey(), _ -> new HashMap<>())
-                    .put(clazz.getAsString(), id);
+                    .put(clazz.getAsString() + ".class", id);
               }
             }
           }
